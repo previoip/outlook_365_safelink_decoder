@@ -1,40 +1,7 @@
+from src.o365safelink import safelinkDecode
+from src.utils import copyToClipboard
 import argparse
 import sys
-
-# Reference:
-#   http://www.o365atp.com/
-#   view-source:http://www.o365atp.com/o365atp.js
-
-
-def copyToClipboard(string):
-    import subprocess
-    import platform
-    string = string.strip()
-    platform = platform.system()
-    
-    if platform == 'Windows':
-        # windows shell
-        clipcmd = 'clip'
-    elif platform == 'Darwin':
-        # mac bash?
-        clipcmd = 'pbcopy'
-    else:
-        raise ValueError(f'{plarform=} : Unassigned copy command for current platform.')
-
-    cmd = f'echo {string}|{clipcmd}'
-    return subprocess.check_call(cmd, shell=True)
-
-def safelinkDecode(url):
-    from urllib import parse
-    data = parse.urlparse(url)
-    query = data.query
-    if not query:
-        raise ValueError(f'tried to parse {url}: \n\tno valid query string in the given url')
-    queryfragment = [i.split('=') for i in query.split('&')]
-    qkeys, qvals = tuple(zip(*queryfragment))
-    qvals = map(parse.unquote, qvals)
-    queryfragment = dict(zip(qkeys, qvals))
-    return queryfragment
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:
@@ -46,7 +13,7 @@ if __name__ == '__main__':
 
         args['url'] = input('target url: ')
         if type(args['url']) is not str or len(args['url']) < 3:
-            raise ValueError(f'url cannot be empty.')
+            raise Exception(f'url cannot be empty.')
 
     else:
         parser = argparse.ArgumentParser('python o365sl.py', description='Decode Outlook365 safelink url.')
@@ -56,7 +23,7 @@ if __name__ == '__main__':
         args = parser.parse_args()
 
         if args.d and args.s:
-            raise ValueError('clipboard is disabled and silent mode is enabled, btw.')
+            raise Exception('clipboard is disabled and silent mode is enabled, btw.')
         args = dict(args._get_kwargs())
 
     parsed_value = safelinkDecode(args['url'])
